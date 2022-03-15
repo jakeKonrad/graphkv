@@ -1,0 +1,3 @@
+[submodule "glzip_core"]
+	path = glzip_core
+	url = ./

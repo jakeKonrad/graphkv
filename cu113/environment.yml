@@ -1,0 +1,11 @@
+name: glzip
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+  - mypy
+  - numpy
+  - cudatoolkit=11.3.*
+  - pytorch=1.10.*
+  - maturin
+  - pip

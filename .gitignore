@@ -1,4 +1,7 @@
 /target
+Cargo.lock
+
+*.swp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -42,31 +45,5 @@ htmlcov/
 nosetests.xml
 coverage.xml
 
-# Translations
-*.mo
-
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
-
-# Rope
-.ropeproject
-
-# Django stuff:
-*.log
-*.pot
-
 .DS_Store
 
-# Sphinx documentation
-docs/_build/
-
-# PyCharm
-.idea/
-
-# VSCode
-.vscode/
-
-# Pyenv
-.python-version
