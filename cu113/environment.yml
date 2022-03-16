@@ -1,4 +1,4 @@
-name: glzip
+name: glzip_cu113
 channels:
   - pytorch
   - conda-forge

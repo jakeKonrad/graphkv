@@ -9,7 +9,7 @@ Graph compression for graph learning systems
 Conda commands to recreate the virtual enviroment I am using
 
     conda env create -f ${CUDA}/environment.yml
-    conda activate pyglzip_${CUDA}
+    conda activate glzip_${CUDA}
     pip install -r ${CUDA}/requirements.txt
 
 where `${CUDA}` should be replaced by `cpu`, `cu102` or `cu113` depending
@@ -20,7 +20,7 @@ on your device.
 If you need to make changes to the environemnt. First clear the environment:
 
     conda deactivate
-    conda env remove -n pyglzip_${CUDA}
+    conda env remove -n glzip_${CUDA}
 
 then rebuild it.
 

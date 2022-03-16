@@ -14,19 +14,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-use std::{
-    error::Error,
-    convert::Infallible
-};
+use std::error::Error;
 
 use pyo3::{
     prelude::*,
     exceptions::PyRuntimeError,
 };
 
-use glzip_core as core;
+use numpy::{
+    PyReadonlyArray1,
+    PyReadonlyArray2,
+    NotContiguousError,
+    ndarray::Axis,
+};
 
-fn handle_core_err(err: Box<dyn Error + Send + Sync>) -> PyErr
+use glzip as core;
+
+fn raise<E: Error>(err: E) -> PyErr
 {
     PyRuntimeError::new_err(err.to_string())
 }
@@ -34,7 +38,7 @@ fn handle_core_err(err: Box<dyn Error + Send + Sync>) -> PyErr
 #[pyclass(module="glzip")]
 struct CSR 
 {
-    csr: core::csr::CSR,
+    csr: core::CSR,
 }
 
 #[pymethods]
@@ -43,67 +47,33 @@ impl CSR
     #[new]
     #[args(
         "*",
-        edgelist="None",
-        filename="None",
-        edges_per_chunk = "None",
-        bytes_per_chunk = "None",
-        num_threads = "None"
+        edge_index = "None",
+        indptr = "None",
+        indices = "None",
     )]
-    fn new(
-        edgelist: Option<Vec<(u32, u32)>>,
-        filename: Option<String>,
-        edges_per_chunk: Option<usize>,
-        bytes_per_chunk: Option<usize>,
-        num_threads: Option<usize>,
+    fn new<'py>(
+        edge_index: Option<PyReadonlyArray2<'py, i64>>,
+        indptr: Option<PyReadonlyArray1<'py, i64>>,
+        indices: Option<PyReadonlyArray1<'py, i64>>,
     ) -> PyResult<Self>
+    where
     {
-        if edgelist.is_none() && filename.is_none() {
-            return Ok(Self { csr: core::csr::CSR::new() });
+        if let Some(edge_index) = edge_index {
+            let arr = edge_index.as_array();
+            let src = arr.index_axis(Axis(0), 0).to_slice().ok_or(NotContiguousError)?;
+            let dst = arr.index_axis(Axis(0), 1).to_slice().ok_or(NotContiguousError)?;
+            let csr = core::CSR::try_from_edge_index(src, dst).map_err(raise)?;
+            Ok(Self { csr })
         }
-
-        let mut builder = core::csr::CSRBuilder::new();
-        builder = match bytes_per_chunk {
-            Some(b) => {
-                match builder.bytes_per_chunk(b) {
-                    Ok(builder) => builder,
-                    Err(builder) => {
-                        match edges_per_chunk {
-                            Some(e) => builder.edges_per_chunk(e),
-                            None => builder,
-                        }
-                    }
-                }
-            }
-            None => { 
-                match edges_per_chunk {
-                    Some(e) => builder.edges_per_chunk(e),
-                    None => builder,
-                }
-            }
-        };
-        builder = match num_threads {
-            Some(n) => builder.num_threads(n),
-            None => builder,
-        };
-
-        Ok(Self { 
-            csr: match edgelist {
-                Some(e) => {
-                    builder.build::<Infallible, _>(e.iter().map(|&(u, v)| Ok([u, v]))).map_err(handle_core_err)?
-                }
-                None => {
-                    match filename {
-                        Some(f) => {
-                            let iter = core::io::load(f).map_err(handle_core_err)?;
-                            builder.build(iter).map_err(handle_core_err)?
-                        }
-                        None => {
-                            unreachable!()
-                        }
-                    }
-                }
-            }
-        })
+        else if let (Some(indptr), Some(indices)) = (indptr, indices) {
+            let indptr = indptr.as_slice()?;
+            let indices = indices.as_slice()?;
+            let csr = core::CSR::try_from_csr(indptr, indices).map_err(raise)?;
+            Ok(Self { csr })
+        }
+        else {
+            Err(PyRuntimeError::new_err("provide either edge_index or indptr and indices"))
+        }
     }
 
     fn __str__(&self) -> String

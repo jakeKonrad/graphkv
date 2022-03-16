@@ -1,5 +1,5 @@
 [package]
-name = "glzip"
+name = "pyglzip"
 version = "0.1.0"
 edition = "2018"
 
@@ -7,8 +7,7 @@ edition = "2018"
 name = "glzip"
 crate-type = ["cdylib"]
 
-[workspace]
-
 [dependencies]
 pyo3 = { version = "0.16.1", features = ["extension-module"] }
-glzip_core = { path = "glzip_core", features = ["csv"] }
+numpy = "0.16.1"
+glzip = { git = "https://github.com/jakeKonrad/glzip" }
