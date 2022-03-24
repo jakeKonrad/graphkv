@@ -14,7 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-use std::error::Error;
+use std::{
+    error::Error,
+    convert::TryInto
+};
 
 use pyo3::{
     prelude::*,
@@ -56,7 +59,6 @@ impl CSR
         indptr: Option<PyReadonlyArray1<'py, i64>>,
         indices: Option<PyReadonlyArray1<'py, i64>>,
     ) -> PyResult<Self>
-    where
     {
         if let Some(edge_index) = edge_index {
             let arr = edge_index.as_array();
@@ -97,6 +99,23 @@ impl CSR
     fn size(&self) -> usize
     {
         self.csr.size()
+    }
+
+    fn optimize<'py>(
+        &self,
+        train_idx: PyReadonlyArray1<'py, i64>,
+        sizes: Vec<usize>
+    ) -> PyResult<(Self, Vec<u32>)>
+    {
+        let mut train_idx_bitmap: Vec<bool> = std::iter::repeat(false).take(self.order()).collect();
+        for &i in train_idx.as_slice()? {
+            let i: usize = i.try_into()?;
+            train_idx_bitmap[i] = true;
+        }
+
+        let (csr, eid) = self.csr.optimize(&train_idx_bitmap[..], &sizes[..]);
+
+        Ok((Self { csr }, eid))
     }
 }   
 

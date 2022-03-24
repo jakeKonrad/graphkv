@@ -1,4 +1,0 @@
-torch-scatter -f https://data.pyg.org/whl/torch-1.10.0+cu102.html
-torch-sparse -f https://data.pyg.org/whl/torch-1.10.0+cu102.html
-torch-geometric
-ogb
