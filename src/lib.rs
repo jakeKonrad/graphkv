@@ -103,6 +103,23 @@ impl CSR {
         )
     }
 
+    fn optimize<'py>(
+        &self,
+        train_idx: PyReadonlyArray1<'py, i64>,
+        sizes: Vec<usize>
+    ) -> PyResult<(Self, Vec<u32>)>
+    {
+        let mut train_idx_bitmap: Vec<bool> = std::iter::repeat(false).take(self.order()).collect();
+        for &i in train_idx.as_slice()? {
+            let i: usize = i.try_into()?;
+            train_idx_bitmap[i] = true;
+        }
+
+        let (csr, eid) = core::reorder::by_access_probabilites(&self.csr, &train_idx_bitmap[..], &sizes[..]);
+
+        Ok((Self { csr }, eid))
+    }
+
     #[getter]
     fn nbytes(&self) -> usize {
         self.csr.nbytes()
