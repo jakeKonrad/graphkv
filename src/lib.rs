@@ -57,12 +57,12 @@ fn core_from_edge_index(src: &[i64], dst: &[i64]) -> PyResult<core::CSR> {
 }
 
 #[pyclass(module = "glzip")]
-struct CSR {
+struct _CSR {
     csr: core::CSR,
 }
 
 #[pymethods]
-impl CSR {
+impl _CSR {
     #[new]
     #[args("*", edge_index = "None", indptr = "None", indices = "None")]
     fn new<'py>(
@@ -148,17 +148,17 @@ fn from_core_adj<'py>(py: Python<'py>, core_adj: core::graph_sage_sampler::Adj) 
 }
 
 #[pyclass]
-struct GraphSageSampler
+struct _GraphSageSampler
 {
-    csr: Py<CSR>,
+    csr: Py<_CSR>,
     sizes: Vec<usize>,
 }
 
 #[pymethods]
-impl GraphSageSampler
+impl _GraphSageSampler
 {
     #[new]
-    fn new(csr: Py<CSR>, sizes: Vec<usize>) -> PyResult<Self>
+    fn new(csr: Py<_CSR>, sizes: Vec<usize>) -> PyResult<Self>
     {
         Ok(Self { csr, sizes })
     }
@@ -182,7 +182,7 @@ impl GraphSageSampler
 
 #[pymodule]
 fn glzip(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_class::<CSR>()?;
-    m.add_class::<GraphSageSampler>()?;
+    m.add_class::<_CSR>()?;
+    m.add_class::<_GraphSageSampler>()?;
     Ok(())
 }

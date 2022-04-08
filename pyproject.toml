@@ -5,7 +5,7 @@ build-backend = "maturin"
 [project]
 name = "glzip"
 requires-python = ">=3.6"
-dependencies = ["numpy"]
+dependencies = []
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
