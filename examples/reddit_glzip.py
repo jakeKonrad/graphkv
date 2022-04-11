@@ -21,7 +21,7 @@ args = parser.parse_args()
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-path = osp.join(root, 'Reddit')
+path = osp.join(args.root, 'Reddit')
 dataset = Reddit(path)
 data = dataset[0]
 
