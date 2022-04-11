@@ -1,10 +1,12 @@
 # Reaches around 0.7870 ± 0.0036 test accuracy.
 
+
+from ogb.nodeproppred import Evaluator, PygNodePropPredDataset
+
 import os.path as osp
 
 import torch
 import torch.nn.functional as F
-from ogb.nodeproppred import Evaluator, PygNodePropPredDataset
 from tqdm import tqdm
 
 from torch_geometric.loader import NeighborSampler
